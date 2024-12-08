@@ -4,6 +4,7 @@ import IndicatorWeather from "./components/IndicatorWeather";
 import TableWeather from "./components/TableWeather";
 import ControlWeather from "./components/ControlWeather";
 import LineChartWeather from "./components/LineChartWeather";
+import Item from "./interface/item";
 
  {/* Hooks */ }
 import { useEffect, useState } from 'react';
@@ -17,6 +18,8 @@ interface Indicator {
 function App() {
   let [indicators, setIndicators] = useState<Indicator[]>([])
   let [owm, setOWM] = useState(localStorage.getItem("openWeatherMap"))
+  let [items, setItems]= useState<Item[]>([]);
+
 
   {/* Hook: useEffect */}
   useEffect( ()=>{
@@ -56,7 +59,6 @@ function App() {
           setOWM( savedTextXML )
       }
 
-
         {/* Valide el procesamiento con el valor de savedTextXML */}
       if( savedTextXML ) {
         {/* XML Parser */}
@@ -66,11 +68,8 @@ function App() {
       {/* Arreglo para agregar los resultados */ }
       let dataToIndicators: Indicator[] = new Array<Indicator>();
 
-      {/* 
-         Análisis, extracción y almacenamiento del contenido del XML 
-         en el arreglo de resultados
-     */}
-
+      {/* Análisis, extracción y almacenamiento del contenido del XML 
+         en el arreglo de resultados*/}
       let name = xml.getElementsByTagName("name")[0].innerHTML || ""
       dataToIndicators.push({ "title": "Location", "subtitle": "City", "value": name })
 
@@ -89,8 +88,25 @@ function App() {
   
          {/* Modificación de la variable de estado mediante la función de actualización */}
         setIndicators( dataToIndicators )
-    }
-  }
+
+        let dataToItems: [Item]= [];
+        const timeElements= xml.getElementsByTagName("time");
+
+        for(const timeElement of Array.from(timeElements).slice(0,6)){
+          const dateStart=timeElement.getAttribute("from");
+          const dateEnd=timeElement.getAttribute("to");
+
+          const precipitation= timeElement.querySelector("precipitation")?.getAttribute("probability")|| "";
+          const humidity= timeElement.querySelector("humidity")?.getAttribute("value")|| ""; 
+          const clouds= timeElement.querySelector("clouds")?.getAttribute("all")|| "";
+          
+          dataToItems.push({ dateStart, dateEnd, precipitation, humidity, clouds });
+        }
+
+          setItems(dataToItems);
+    };
+
+  };
 
         request();
 
@@ -115,30 +131,6 @@ function App() {
   return (
     <Grid container spacing={5}>
        {renderIndicators()}
-      <Grid size={{ xs: 12, xl: 3 }}>
-        {" "}
-        <IndicatorWeather
-          title={"Indicator 2"}
-          subtitle={"Unidad 2"}
-          value={"3.12"}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, xl: 3 }}>
-        {" "}
-        <IndicatorWeather
-          title={"Indicator 3"}
-          subtitle={"Unidad 3"}
-          value={"2.31"}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, xl: 3 }}>
-        {" "}
-        <IndicatorWeather
-          title={"Indicator 4"}
-          subtitle={"Unidad 4"}
-          value={"3.21"}
-        />
-      </Grid>
 
       {/* Tabla */}
       <Grid size={{ xs: 12, xl: 8 }}>
@@ -148,7 +140,7 @@ function App() {
             <ControlWeather />
           </Grid>
           <Grid size={{ xs: 12, xl: 9 }}>
-            <TableWeather />
+            <TableWeather itemsIn={items}/>
           </Grid>
         </Grid>
       </Grid>
