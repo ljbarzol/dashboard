@@ -5,6 +5,7 @@ import TableWeather from "./components/TableWeather";
 import ControlWeather from "./components/ControlWeather";
 import LineChartWeather from "./components/LineChartWeather";
 import Item from "./interface/item";
+import Header from "./components/Header";
 
  {/* Hooks */ }
 import { useEffect, useState } from 'react';
@@ -19,7 +20,7 @@ function App() {
   let [indicators, setIndicators] = useState<Indicator[]>([])
   let [owm, setOWM] = useState(localStorage.getItem("openWeatherMap"))
   let [items, setItems]= useState<Item[]>([]);
-
+  let [temperature, setTemperature] = useState<number>(0);  // Estado para almacenar la temperatura
 
   {/* Hook: useEffect */}
   useEffect( ()=>{
@@ -89,7 +90,7 @@ function App() {
          {/* Modificación de la variable de estado mediante la función de actualización */}
         setIndicators( dataToIndicators )
 
-        let dataToItems: [Item]= [];
+        let dataToItems: Item[]= [];
         const timeElements= xml.getElementsByTagName("time");
 
         for(const timeElement of Array.from(timeElements).slice(0,6)){
@@ -104,6 +105,9 @@ function App() {
         }
 
           setItems(dataToItems);
+            // Obtener la temperatura actual en Kelvin y actualizar el estado
+        const temperatureInKelvin = parseFloat(xml.querySelector("temperature")?.getAttribute("value") || "0");
+        setTemperature(temperatureInKelvin);
     };
 
   };
@@ -114,22 +118,25 @@ function App() {
 
   let renderIndicators = () => {
 
-    return indicators
-            .map(
-                (indicator, idx) => (
-                    <Grid key={idx} size={{ xs: 12, xl: 3 }}>
-                        <IndicatorWeather 
-                            title={indicator["title"]} 
-                            subtitle={indicator["subtitle"]} 
-                            value={indicator["value"]} />
-                    </Grid>
-                )
-            )
+    return indicators.map((indicator, idx) => (
+      <Grid key={idx} size={{ xs: 12, xl: 3 }}>
+          <IndicatorWeather 
+              title={indicator["title"]} 
+              subtitle={indicator["subtitle"]} 
+              value={indicator["value"]} />
+      </Grid>
+      )
+  )
 }
 
    {/* JSX */}
   return (
     <Grid container spacing={5}>
+      {/* Encabezado con saludo y temperatura */}
+      <Grid item xs={12}>
+        <Header temperature={temperature} />
+      </Grid>
+
        {renderIndicators()}
 
       {/* Tabla */}
