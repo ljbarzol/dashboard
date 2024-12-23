@@ -13,13 +13,11 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 interface ControlWeatherProps {
   dates: string[];
   onDateChange: (event: SelectChangeEvent) => void;
-  onHourChange: (event: SelectChangeEvent) => void;
 }
 
 export default function ControlWeather({
   dates,
   onDateChange,
-  onHourChange
 }: ControlWeatherProps) {
   {/* Constante de referencia a un elemento HTML */ }
   const descriptionRef = useRef<HTMLDivElement>(null);
