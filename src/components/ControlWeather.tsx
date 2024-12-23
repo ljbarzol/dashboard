@@ -31,10 +31,6 @@ export default function ControlWeather({
     onDateChange(event); 
   };
 
-  const handleHourChange = (event: SelectChangeEvent) => {
-    onHourChange(event); 
-  };
-
   {/* JSX */}
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
