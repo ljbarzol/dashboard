@@ -6,170 +6,125 @@ import ControlWeather from "./components/ControlWeather";
 import LineChartWeather from "./components/LineChartWeather";
 import Item from "./interface/item";
 import HeaderWeather from "./components/HeaderWeather";
-import { SelectChangeEvent } from '@mui/material';
-
-
- {/* Hooks */ }
 import { useEffect, useState } from 'react';
 
 interface Indicator {
-  title?: String;
-  subtitle?: String;
-  value?: String;
+  title?: string;
+  subtitle?: string;
+  value?: string;
 }
 
 function App() {
-  let [indicators, setIndicators] = useState<Indicator[]>([])
-  let [owm, setOWM] = useState(localStorage.getItem("openWeatherMap"))
-  let [items, setItems]= useState<Item[]>([]);
-  //FECHA 
-  let [dates, setDates] = useState<string[]>([]); // Para almacenar las fechas disponibles
-  let [selectedDate, setSelectedDate] = useState<string>(""); // Fecha seleccionada
-  let [selectedHour, setSelectedHour] = useState<string>(""); // Hora seleccionada
-  const [, setTemperature] = useState<number[]>([]);
-  const [, setHumidity] = useState<number[]>([]);
-  const [hour, setHour] = useState<string[]>([]); 
+  // Estados
+  const [indicators, setIndicators] = useState<Indicator[]>([]);
+  const [owm, setOWM] = useState<string | null>(localStorage.getItem("openWeatherMap"));
+  const [items, setItems] = useState<Item[]>([]);
+  const [dates, setDates] = useState<string[]>([]);  // Fechas disponibles
+  const [selectedDate, setSelectedDate] = useState<string>("");  // Fecha seleccionada
+  const [selectedHour, setSelectedHour] = useState<string>("");  // Hora seleccionada
+  const [hours, setHours] = useState<string[]>([]);  // Horas disponibles
 
-  {/* Hook: useEffect */}
-  useEffect( ()=>{
-    let request = async () => { 
-      {/* Referencia a las claves del LocalStorage: openWeatherMap y expiringTime */}
+  // Hook para obtener y procesar datos
+  useEffect(() => {
+    const request = async () => {
       let savedTextXML = localStorage.getItem("openWeatherMap") || "";
-      let expiringTime = localStorage.getItem("expiringTime");
+      const expiringTime = localStorage.getItem("expiringTime");
 
-      {/* Obtenga la estampa de tiempo actual */}
+      // Verificar si el tiempo de expiración ha pasado
       let nowTime = (new Date()).getTime();
-    
-      {/* Verifique si es que no existe la clave expiringTime o si la estampa de tiempo actual supera el tiempo de expiración */}
-      if(expiringTime === null || nowTime > parseInt(expiringTime)) {
-
-      {/* Request */}
-      let API_KEY = "4c2f62dbdfec40df92bf08ed666c20cc"
-      let response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=Guayaquil&mode=xml&appid=${API_KEY}`)
-      let savedTextXML = await response.text();    
-      
-          {/* Tiempo de expiración */}
-          let hours = 0.01
-          let delay = hours * 3600000
-          let expiringTime = nowTime + delay
-
-
-          {/* En el LocalStorage, almacene el texto en la clave openWeatherMap, estampa actual y estampa de tiempo de expiración */}
-          localStorage.setItem("openWeatherMap", savedTextXML)
-          localStorage.setItem("expiringTime", expiringTime.toString())
-          localStorage.setItem("nowTime", nowTime.toString())
-
-          {/* DateTime */}
-          localStorage.setItem("expiringDateTime", new Date(expiringTime).toString())
-          localStorage.setItem("nowDateTime", new Date(nowTime).toString())
-
-          {/* Modificación de la variable de estado mediante la función de actualización */ }
-          setOWM( savedTextXML )
+      if (expiringTime === null || nowTime > parseInt(expiringTime)) {
+        const API_KEY = "4c2f62dbdfec40df92bf08ed666c20cc";
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=Guayaquil&mode=xml&appid=${API_KEY}`);
+        savedTextXML = await response.text();
+        
+        // Almacenar los datos en localStorage
+        const hours = 0.01;  // Definir tiempo de expiración en horas
+        const delay = hours * 3600000;
+        const newExpiringTime = nowTime + delay;
+        
+        localStorage.setItem("openWeatherMap", savedTextXML);
+        localStorage.setItem("expiringTime", newExpiringTime.toString());
+        localStorage.setItem("nowTime", nowTime.toString());
+        localStorage.setItem("expiringDateTime", new Date(newExpiringTime).toString());
+        localStorage.setItem("nowDateTime", new Date(nowTime).toString());
+        setOWM(savedTextXML);  // Actualizar el estado con los nuevos datos
       }
 
-        {/* Valide el procesamiento con el valor de savedTextXML */}
-      if( savedTextXML ) {
-        {/* XML Parser */}
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(savedTextXML, "application/xml");
+      if (savedTextXML) {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(savedTextXML, "application/xml");
 
-      {/* Arreglo para agregar los resultados */ }
-      let dataToIndicators: Indicator[] = new Array<Indicator>();
+        // Extraer datos de la respuesta XML
+        let dataToIndicators: Indicator[] = [];
+        let name = xml.getElementsByTagName("name")[0]?.innerHTML || "";
+        let country = xml.getElementsByTagName("country")[0]?.innerHTML || "";
+        dataToIndicators.push({ title: "Ubicación", subtitle: country, value: name });
 
-      {/* Análisis, extracción y almacenamiento del contenido del XML 
-         en el arreglo de resultados*/}
-      let name = xml.getElementsByTagName("name")[0].innerHTML || ""
-      let country = xml.getElementsByTagName("country")[0].innerHTML || ""
+        let location = xml.getElementsByTagName("location")[1];
+        let latitude = location?.getAttribute("latitude") || "";
+        dataToIndicators.push({ title: "Latitud", subtitle: "° (grados)", value: latitude });
+        let longitude = location?.getAttribute("longitude") || "";
+        dataToIndicators.push({ title: "Longitud", subtitle: "° (grados)", value: longitude });
+        let altitude = location?.getAttribute("altitude") || "";
+        dataToIndicators.push({ title: "Altitud", subtitle: "msnm (metros sobre el nivel del mar)", value: altitude });
 
-      dataToIndicators.push({ "title": "Ubicación", "subtitle": country, "value": name })
+        setIndicators(dataToIndicators);  // Actualizar indicadores
 
-      let location = xml.getElementsByTagName("location")[1]
-      let latitude = location.getAttribute("latitude") || ""
-      dataToIndicators.push({ "title": "Latitud", "subtitle": "° (grados)", "value": latitude })
-      let longitude = location.getAttribute("longitude") || ""
-      dataToIndicators.push({ "title": "Longitud", "subtitle": "° (grados)", "value": longitude })
-      let altitude = location.getAttribute("altitude") || ""
-      dataToIndicators.push({ "title": "Altitud", "subtitle": "msnm (metros sobre el nivel del mar)", "value": altitude })
-  
-         {/* Modificación de la variable de estado mediante la función de actualización */}
-        setIndicators( dataToIndicators )
+        // Procesar datos para la tabla
+        let dataToItems: Item[] = [];
+        let dateSet = new Set<string>();  // Fechas únicas
+        let hoursSet = new Set<string>();  // Horas únicas
 
+        const timeElements = xml.getElementsByTagName("time");
 
+        for (const timeElement of Array.from(timeElements)) {
+          const dateStart = timeElement.getAttribute("from");
+          const dateEnd = timeElement.getAttribute("to");
 
-        let dataToItems: Item[]= [];
-        let dateSet = new Set<string>(); // Usamos un Set para obtener fechas únicas
-        let hoursSet = new Set<string>(); // Para las horas disponibles
+          const precipitation = timeElement.querySelector("precipitation")?.getAttribute("probability") || "";
+          const humidity = timeElement.querySelector("humidity")?.getAttribute("value") || "";
+          const temperature = timeElement.querySelector("temperature")?.getAttribute("value") || "";
+          const clouds = timeElement.querySelector("clouds")?.getAttribute("all") || "";
 
-        const timeElements= xml.getElementsByTagName("time");
-
-        for(const timeElement of Array.from(timeElements)){
-          const dateStart=timeElement.getAttribute("from");
-          const dateEnd=timeElement.getAttribute("to");
-
-          const precipitation= timeElement.querySelector("precipitation")?.getAttribute("probability")|| "";
-          const humidity= timeElement.querySelector("humidity")?.getAttribute("value")|| ""; 
-          const temperature= timeElement.querySelector("temperature")?.getAttribute("value")|| ""; 
-          const clouds= timeElement.querySelector("clouds")?.getAttribute("all")|| "";
-          
           if (dateStart) {
-            let date = dateStart.split('T')[0]; // Extraer solo la fecha
-            dateSet.add(date); 
-            let hour = dateStart.split('T')[1]; // Extraer la hora
-            hoursSet.add(hour); // Agregar la hora al Set
+            let date = dateStart.split('T')[0];  // Extraer la fecha
+            dateSet.add(date);  // Agregar la fecha al Set
+            let hour = dateStart.split('T')[1];  // Extraer la hora
+            hoursSet.add(hour);  // Agregar la hora al Set
           }
-          dataToItems.push({ hours, dateStart, dateEnd, precipitation, humidity, clouds, temperature });
+
+          dataToItems.push({ dateStart, dateEnd, precipitation, humidity, clouds, temperature });
         }
 
-          setItems(dataToItems);
-          setDates(Array.from(dateSet)); // Establecer las fechas únicas
-          setHour(Array.from(hoursSet)); // Establecer las horas únicas
-        };
-        
+        setItems(dataToItems);
+        setDates(Array.from(dateSet));  // Establecer fechas únicas
+        setHours(Array.from(hoursSet));  // Establecer horas únicas
+      }
+    };
+
+    request();
+  }, [owm, selectedDate]);
+
+  // Manejar cambios de fecha
+  const handleDateChange = (event: { target: { value: string } }) => {
+    setSelectedDate(event.target.value);
   };
 
-        request();
-
-  }, [owm, selectedDate] )
-
-
-  
-  const handleDateChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setSelectedDate(event.target.value as string);
+  // Manejar cambios de hora
+  const handleHourChange = (event: { target: { value: string } }) => {
+    setSelectedHour(event.target.value);
   };
 
-  const handleHourChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setSelectedHour(event.target.value as string);
-  };
+  // Filtrar los items por la fecha seleccionada
+  const filteredItems = selectedDate
+    ? items.filter((item) => item.dateStart?.startsWith(selectedDate))
+    : items;
 
-
-
-
-  let renderIndicators = () => {
-
-    return indicators
-            .map(
-                (indicator, idx) => (
-                    <Grid key={idx} size={{ xs: 12, xl: 3 }}>
-                        <IndicatorWeather 
-                            title={indicator["title"]} 
-                            subtitle={indicator["subtitle"]} 
-                            value={indicator["value"]} />
-                    </Grid>
-                )
-            )
-}
-//Filtros
-const filteredItems = selectedDate
-  ? items.filter((item) => item.dateStart?.startsWith(selectedDate))
-  : items;
-
-  
-  
-  //Grafico 
+  // Gráfico de datos
   useEffect(() => {
     const tempArray: number[] = [];
     const humidityArray: number[] = [];
-    const hoursArray: string[] = []; 
+    const hoursArray: string[] = [];
 
     filteredItems.forEach((item) => {
       const temp = parseFloat(item.temperature || "0");
@@ -183,45 +138,49 @@ const filteredItems = selectedDate
       }
     });
 
-    setTemperature(tempArray);
-    setHumidity(humidityArray);
-    setHour(hoursArray);
+    setHours(hoursArray);
   }, [filteredItems, selectedHour]);
 
-   {/* JSX */}
-   console.log("Datos validados para el gráfico:", filteredItems);
-   return (
+  // Renderizar los indicadores
+  const renderIndicators = () => {
+    return indicators.map((indicator, idx) => (
+      <Grid key={idx} size={{ xs: 12, xl: 3 }}>
+        <IndicatorWeather
+          title={indicator.title}
+          subtitle={indicator.subtitle}
+          value={indicator.value}
+        />
+      </Grid>
+    ));
+  };
+
+  return (
     <>
       <HeaderWeather />
       <Grid container spacing={5}>
         {renderIndicators()}
 
-        {/* Tabla */}
+        {/* Tabla de datos */}
         <Grid size={{ xs: 12, xl: 8 }}>
-          {/* Grid Anidado */}
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, xl: 3 }}>
-
               <ControlWeather
-                dates={dates} // Pasar las fechas disponibles al componente de control
-                hours={hours} // Pasar las horas disponibles por día
+                dates={dates}
+                hours={hours}
                 onDateChange={handleDateChange}
                 onHourChange={handleHourChange}
-                />
-
-</Grid>
+              />
+            </Grid>
             <Grid size={{ xs: 12, xl: 9 }}>
-              <TableWeather itemsIn={filteredItems} selectedDate={selectedDate} selectedHour={selectedHour}/>
+              <TableWeather itemsIn={filteredItems} selectedDate={selectedDate} selectedHour={selectedHour} />
             </Grid>
           </Grid>
         </Grid>
-                
+
         {/* Gráfico */}
         <Grid size={{ xs: 12, xl: 4 }}>
-          {" "}
           {selectedDate}
           <LineChartWeather itemsIn={filteredItems} />
-
         </Grid>
       </Grid>
     </>

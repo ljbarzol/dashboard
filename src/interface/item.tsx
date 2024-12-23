@@ -5,5 +5,4 @@ export default interface Item {
     humidity: string; 
     clouds: string
     temperature: string
-    hour: string
 }
