@@ -116,7 +116,7 @@ function App() {
             let hour = dateStart.split('T')[1]; // Extraer la hora
             hoursSet.add(hour); // Agregar la hora al Set
           }
-          dataToItems.push({ dateStart, dateEnd, precipitation, humidity, clouds, temperature });
+          dataToItems.push({ hour, dateStart, dateEnd, precipitation, humidity, clouds, temperature });
         }
 
           setItems(dataToItems);
