@@ -22,7 +22,7 @@ function App() {
   const [dates, setDates] = useState<string[]>([]);  // Fechas disponibles
   const [selectedDate, setSelectedDate] = useState<string>("");  // Fecha seleccionada
   const [selectedHour, setSelectedHour] = useState<string>("");  // Hora seleccionada
-  const [hours, setHours] = useState<string[]>([]);  // Horas disponibles
+  const [, setHours] = useState<string[]>([]);  // Horas disponibles
 
   // Hook para obtener y procesar datos
   useEffect(() => {
@@ -30,7 +30,6 @@ function App() {
       let savedTextXML = localStorage.getItem("openWeatherMap") || "";
       const expiringTime = localStorage.getItem("expiringTime");
 
-      // Verificar si el tiempo de expiración ha pasado
       let nowTime = (new Date()).getTime();
       if (expiringTime === null || nowTime > parseInt(expiringTime)) {
         const API_KEY = "4c2f62dbdfec40df92bf08ed666c20cc";
@@ -47,7 +46,7 @@ function App() {
         localStorage.setItem("nowTime", nowTime.toString());
         localStorage.setItem("expiringDateTime", new Date(newExpiringTime).toString());
         localStorage.setItem("nowDateTime", new Date(nowTime).toString());
-        setOWM(savedTextXML);  // Actualizar el estado con los nuevos datos
+        setOWM(savedTextXML);  
       }
 
       if (savedTextXML) {
@@ -166,7 +165,6 @@ function App() {
             <Grid size={{ xs: 12, xl: 3 }}>
               <ControlWeather
                 dates={dates}
-                hours={hours}
                 onDateChange={handleDateChange}
                 onHourChange={handleHourChange}
               />

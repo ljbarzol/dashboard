@@ -12,14 +12,12 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 interface ControlWeatherProps {
   dates: string[];
-  hours: string[];  // Añadir 'hours' a las props
   onDateChange: (event: SelectChangeEvent) => void;
   onHourChange: (event: SelectChangeEvent) => void;
 }
 
 export default function ControlWeather({
   dates,
-  hours,
   onDateChange,
   onHourChange
 }: ControlWeatherProps) {
@@ -30,11 +28,11 @@ export default function ControlWeather({
 
   const handleDateChange = (event: SelectChangeEvent) => {
     setSelectedDate(event.target.value);
-    onDateChange(event); // Pasar el cambio de fecha al componente padre
+    onDateChange(event); 
   };
 
   const handleHourChange = (event: SelectChangeEvent) => {
-    onHourChange(event); // Pasar el cambio de hora al componente padre
+    onHourChange(event); 
   };
 
   {/* JSX */}
@@ -52,24 +50,6 @@ export default function ControlWeather({
             {dates.map((date, idx) => (
               <MenuItem key={idx} value={date}>
                 {date}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-
-      <Box sx={{ minWidth: 120, marginTop: 2 }}>
-        <FormControl fullWidth>
-          <InputLabel id="simple-select-label">Hora</InputLabel>
-          <Select
-            labelId="hour-select-label"
-            value=""
-            onChange={handleHourChange}
-            label="Hora"
-          >
-            {hours.map((hour, idx) => (
-              <MenuItem key={idx} value={hour}>
-                {hour}
               </MenuItem>
             ))}
           </Select>
