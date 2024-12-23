@@ -6,6 +6,7 @@ import ControlWeather from "./components/ControlWeather";
 import LineChartWeather from "./components/LineChartWeather";
 import Item from "./interface/item";
 import HeaderWeather from "./components/HeaderWeather";
+import { SelectChangeEvent } from '@mui/material';
 
 
  {/* Hooks */ }
@@ -27,7 +28,7 @@ function App() {
   let [selectedHour, setSelectedHour] = useState<string>(""); // Hora seleccionada
   const [, setTemperature] = useState<number[]>([]);
   const [, setHumidity] = useState<number[]>([]);
-  const [hours, setHours] = useState<string[]>([]); 
+  const [hour, setHour] = useState<string[]>([]); 
 
   {/* Hook: useEffect */}
   useEffect( ()=>{
@@ -116,12 +117,12 @@ function App() {
             let hour = dateStart.split('T')[1]; // Extraer la hora
             hoursSet.add(hour); // Agregar la hora al Set
           }
-          dataToItems.push({ hour, dateStart, dateEnd, precipitation, humidity, clouds, temperature });
+          dataToItems.push({ hours, dateStart, dateEnd, precipitation, humidity, clouds, temperature });
         }
 
           setItems(dataToItems);
           setDates(Array.from(dateSet)); // Establecer las fechas únicas
-          setHours(Array.from(hoursSet)); // Establecer las horas únicas
+          setHour(Array.from(hoursSet)); // Establecer las horas únicas
         };
         
   };
@@ -162,11 +163,7 @@ const filteredItems = selectedDate
   ? items.filter((item) => item.dateStart?.startsWith(selectedDate))
   : items;
 
-  const filteredHours = filteredItems.map((item) => {
-    const datePart = item.dateStart?.split('T')[0] || ""; // Fecha
-    const hourPart = item.dateStart?.split('T')[1] || ""; // Hora
-    return `${datePart} ${hourPart}`; // Combina fecha y hora
-  });
+  
   
   //Grafico 
   useEffect(() => {
@@ -188,7 +185,7 @@ const filteredItems = selectedDate
 
     setTemperature(tempArray);
     setHumidity(humidityArray);
-    setHours(hoursArray);
+    setHour(hoursArray);
   }, [filteredItems, selectedHour]);
 
    {/* JSX */}
@@ -214,7 +211,7 @@ const filteredItems = selectedDate
 
 </Grid>
             <Grid size={{ xs: 12, xl: 9 }}>
-              <TableWeather itemsIn={filteredItems} />
+              <TableWeather itemsIn={filteredItems} selectedDate={selectedDate} selectedHour={selectedHour}/>
             </Grid>
           </Grid>
         </Grid>

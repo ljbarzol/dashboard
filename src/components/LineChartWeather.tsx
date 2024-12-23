@@ -7,7 +7,7 @@ interface LineChartWeatherProps {
 }
 export default function LineChartWeather({ itemsIn }: LineChartWeatherProps) {
   const data = itemsIn.map(item => ({
-    temperature: item.temperature - 273.15, 
+    temperature: parseFloat(item.temperature) - 273.15, 
     humidity: item.humidity,
     hours: item.dateStart, 
   }));
@@ -20,7 +20,7 @@ export default function LineChartWeather({ itemsIn }: LineChartWeatherProps) {
         height={250}
         series={[
           { data: data.map(d => d.temperature), label: 'Temperatura (°C)' },
-          { data: data.map(d => d.humidity), label: 'Humedad (%)' },
+          { data: data.map(d => parseFloat(d.humidity)), label: 'Humedad (%)' },
         ]}
         
       />
