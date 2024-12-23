@@ -1,0 +1,54 @@
+.header-weather {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh; /* Ajusta el alto según lo necesites */
+  position: relative; /* Necesario para posicionar el contenido */
+  color: white; /* Asegúrate de que el texto sea visible sobre la imagen */
+  overflow: hidden; /* Asegura que el contenido fuera del contenedor no se vea */
+}
+
+.header-content {
+  position: absolute; /* Hace que el contenido se posicione sobre la imagen */
+  z-index: 2; /* Asegura que el contenido esté por encima de la imagen */
+  text-align: center; /* Centra el texto */
+  top: 50%; /* Centra el contenido verticalmente */
+  left: 50%; /* Centra el contenido horizontalmente */
+  transform: translate(-50%, -50%); /* Ajusta el centro */
+  padding: 20px; /* Espacio alrededor del texto */
+}
+
+.greeting {
+  font-size: 5rem; /* Tamaño grande para el texto */
+  font-weight: 700; /* Texto más grueso */
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7); /* Sombra para mejor contraste */
+  margin: 0; /* Elimina márgenes alrededor del texto */
+  z-index: 3; /* Asegura que el texto esté por encima de la imagen */
+  opacity: 1; /* Asegura que el texto no sea transparente */
+  white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+}
+
+.weather-icon {
+  position: absolute;
+  top: 50%; /* Centra verticalmente la imagen */
+  left: 50%; /* Centra horizontalmente la imagen */
+  transform: translate(-50%, -50%); /* Ajusta el centro exacto */
+  opacity: 0.3; /* Transparencia de la imagen */
+  width:max-content; /* Asegura que la imagen ocupe más espacio */
+  height:max-content; /* Ajusta la altura de la imagen */
+  object-fit: cover; /* Asegura que la imagen cubra todo el contenedor */
+  z-index: 1; /* La imagen debe estar detrás del contenido */
+  pointer-events: none; /* Permite hacer clic en los elementos sobre la imagen */
+}
+
+/* Ajuste para pantallas pequeñas */
+@media (max-width: 800px) {
+  .greeting {
+    font-size: 3rem; /* Reduce el tamaño del texto para pantallas pequeñas */
+    white-space: normal; /* Permite que el texto se divida en varias líneas en pantallas pequeñas */
+  }
+  .weather-icon {
+    width: 250%; /* Ajusta la imagen en pantallas pequeñas */
+    height: 250%; /* Ajusta la imagen en pantallas pequeñas */
+  }
+}
