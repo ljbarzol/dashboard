@@ -21,7 +21,7 @@ function App() {
   const [items, setItems] = useState<Item[]>([]);
   const [dates, setDates] = useState<string[]>([]);  // Fechas disponibles
   const [selectedDate, setSelectedDate] = useState<string>("");  // Fecha seleccionada
-  const [selectedHour, setSelectedHour] = useState<string>("");  // Hora seleccionada
+  const [selectedHour, ] = useState<string>("");  // Hora seleccionada
   const [, setHours] = useState<string[]>([]);  // Horas disponibles
 
   // Hook para obtener y procesar datos
@@ -109,10 +109,6 @@ function App() {
     setSelectedDate(event.target.value);
   };
 
-  // Manejar cambios de hora
-  const handleHourChange = (event: { target: { value: string } }) => {
-    setSelectedHour(event.target.value);
-  };
 
   // Filtrar los items por la fecha seleccionada
   const filteredItems = selectedDate
@@ -166,7 +162,6 @@ function App() {
               <ControlWeather
                 dates={dates}
                 onDateChange={handleDateChange}
-                onHourChange={handleHourChange}
               />
             </Grid>
             <Grid size={{ xs: 12, xl: 9 }}>
